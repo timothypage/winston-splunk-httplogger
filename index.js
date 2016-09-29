@@ -102,37 +102,27 @@ SplunkStreamEvent.prototype.config = function() {
  */
 SplunkStreamEvent.prototype.log = function (level, msg, meta, callback) {
     var self = this;
-
-    if (meta instanceof Error) {
-        meta = {
-            errmsg: meta.message,
-            name: meta.name,
-            stack: meta.stack
-        };
-    }
+    console.log("winston splunk meta", meta)
 
     var payload = {
-        message: {
-            msg: msg
-        },
-        metadata: {
-            source: this.defaultMetadata.source,
-            sourcetype: this.defaultMetadata.sourcetype
-        },
-        severity: level
+      message: {},
+      metadata: {},
+      severity: level
     };
 
     if (meta) {
         if (meta instanceof Error) {
-            payload.message.meta = {
-                error: meta.message,
-                name: meta.name,
-                stack: meta.stack
-            };
-        } else if (meta.length) {
-            payload.message.meta = meta;
+          payload.message.error = meta.message;
+          payload.message.name =  meta.name;
+          payload.message.stack = meta.stack;
+        } else {
+          payload.message.meta = meta;
         }
     }
+
+    payload.message.text = msg;
+    payload.metadata.source = this.defaultMetadata.source;
+    payload.metadata.sourcetype = this.defaultMetadata.sourcetype;
 
     this.server.send(payload, function (err) {
         if (err) self.emit('error', err);
