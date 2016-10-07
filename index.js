@@ -65,7 +65,8 @@ var SplunkStreamEvent = function (config) {
     // in this and delete from the splunk object
     this.defaultMetadata = {
         source: 'winston',
-        sourcetype: 'winston-splunk-logger'
+        sourcetype: 'winston-splunk-logger',
+        host: 'unknown'
     };
     if (config.splunk.source) {
         this.defaultMetadata.source = config.splunk.source
@@ -74,6 +75,10 @@ var SplunkStreamEvent = function (config) {
     if (config.splunk.sourcetype) {
         this.defaultMetadata.sourcetype = config.splunk.sourcetype
         delete config.splunk.sourcetype;
+    }
+    if (config.splunk.host) {
+        this.defaultMetadata.host = config.splunk.host
+        delete config.splunk.host;
     }
     // This gets around a problem with setting maxBatchCount
     config.splunk.maxBatchCount = 1;
@@ -120,6 +125,7 @@ SplunkStreamEvent.prototype.log = function (level, msg, meta, callback) {
     }
 
     payload.message.text = msg;
+    payload.metadata.host = this.defaultMetadata.host;
     payload.metadata.source = this.defaultMetadata.source;
     payload.metadata.sourcetype = this.defaultMetadata.sourcetype;
 
